@@ -1,0 +1,27 @@
+# Quinipolo Mobile - Commit Message Template
+
+# Type of change:
+# - feat: New feature
+# - fix: Bug fix
+# - docs: Documentation changes
+# - style: Code style changes (formatting, etc.)
+# - refactor: Code refactoring
+# - test: Adding or updating tests
+# - chore: Maintenance tasks
+
+# Subject line (50 chars or less)
+#
+
+# Body (optional)
+# - Explain what and why, not how
+# - Reference issues if applicable
+#
+# Requirements met:
+# ✅ 80% code coverage maintained
+# ✅ No unused variables
+# ✅ All linting rules passed
+# ✅ TypeScript types checked
+
+# Footer (optional)
+# - Breaking changes
+# - References to issues
