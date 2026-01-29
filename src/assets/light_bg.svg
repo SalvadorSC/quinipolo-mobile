@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Capa_2" data-name="Capa 2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 373 768">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #235387;
+      }
+
+      .cls-1, .cls-2 {
+        fill-rule: evenodd;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4 {
+        stroke-width: 0px;
+      }
+
+      .cls-2 {
+        fill: #236bad;
+      }
+
+      .cls-3 {
+        fill: none;
+      }
+
+      .cls-4 {
+        fill: #1d7fb5;
+      }
+
+      .cls-5 {
+        clip-path: url(#clippath);
+      }
+    </style>
+    <clipPath id="clippath">
+      <rect class="cls-3" x=".28" width="372.45" height="768"/>
+    </clipPath>
+  </defs>
+  <rect id="Dark-Background-ver2" class="cls-3" x=".28" width="372.45" height="768"/>
+  <g class="cls-5">
+    <rect class="cls-4" x="-5.88" y="-6.36" width="384.75" height="756.67"/>
+    <path class="cls-2" d="M-5.88,87.07c11.56-3.13,23.62-5.42,36.22-6.71,118.27-12.15,200.17,92.2,299.93,111.63,16.19,3.15,32.4,6.21,48.61,8.95v420.79l-384.75,1.24V87.07Z"/>
+    <path class="cls-1" d="M378.88,426.23c-11.56-3.55-23.62-6.14-36.22-7.61-118.27-13.77-200.17,104.48-299.93,126.5-16.19,3.57-32.4,7.03-48.61,10.14v251.22l384.75-23.63v-356.62Z"/>
+  </g>
+</svg>
