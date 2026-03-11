@@ -1,6 +1,12 @@
 // Quinipolo Types - Mobile
+export type GameType = "waterpolo" | "football" | "basketball" | "handball" | "tennis";
+
+export const GAME_15_ALLOWED_SPORTS: GameType[] = ["waterpolo", "football"];
+
+export const NO_TIE_SPORTS: GameType[] = ["tennis"];
+
 export interface SurveyData {
-  gameType: "waterpolo" | "football";
+  gameType: GameType;
   homeTeam: string;
   awayTeam: string;
   date: Date | null;
@@ -11,15 +17,12 @@ export interface SurveyData {
 
 export interface TeamOption {
   name: string;
-  sport: "waterpolo" | "football";
+  sport: GameType;
   gender: "m" | "f" | null;
   aliases?: string[];
 }
 
-export type TeamOptionsBySport = {
-  waterpolo: TeamOption[];
-  football: TeamOption[];
-};
+export type TeamOptionsBySport = Record<GameType, TeamOption[]>;
 
 export interface CorrectAnswer {
   matchNumber: number;

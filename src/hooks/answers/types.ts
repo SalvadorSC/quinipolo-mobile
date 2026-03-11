@@ -10,7 +10,7 @@ export interface AnswerType {
 export interface Match {
   homeTeam: string;
   awayTeam: string;
-  gameType: 'waterpolo' | 'football';
+  gameType: 'waterpolo' | 'football' | 'basketball' | 'handball' | 'tennis';
   leagueId?: string;
   leagueName?: string;
 }
