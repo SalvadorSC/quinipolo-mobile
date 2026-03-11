@@ -1,13 +1,14 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { useTranslation } from 'react-i18next';
 import { colors } from '../styles/globalStyles';
 import SegmentedButtonGroup from './SegmentedButtonGroup';
+import { NO_TIE_SPORTS, GameType } from '../types/quinipolo';
 
 interface MatchWinnerButtonsProps {
   match: {
     homeTeam: string;
     awayTeam: string;
+    gameType?: GameType;
   };
   matchIndex: number;
   selectedWinner: string;
@@ -22,7 +23,7 @@ const MatchWinnerButtons: React.FC<MatchWinnerButtonsProps> = ({
   onWinnerChange,
   disabled = false,
 }) => {
-  const { t } = useTranslation();
+  const tieDisabled = match.gameType ? NO_TIE_SPORTS.includes(match.gameType) : false;
 
   const handleValueChange = (value: string) => {
     onWinnerChange(matchIndex, value);
@@ -46,7 +47,7 @@ const MatchWinnerButtons: React.FC<MatchWinnerButtonsProps> = ({
           {
             value: 'empat',
             label: 'X',
-            disabled,
+            disabled: disabled || tieDisabled,
             style:
               selectedWinner === 'empat' ? styles.selectedButton : undefined,
           },
