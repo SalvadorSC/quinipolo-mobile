@@ -19,11 +19,12 @@ interface PaginatedQuinipolosListProps {
   quinipolos: Quinipolo[];
   username: string;
   itemsPerPage?: number;
+  userLeagues?: Array<{ league_id: string; role: string }>;
 }
 
 export const PaginatedQuinipolosList: React.FC<
   PaginatedQuinipolosListProps
-> = ({ quinipolos, username, itemsPerPage = 2 }) => {
+> = ({ quinipolos, username, itemsPerPage = 2, userLeagues }) => {
   const [currentPage, setCurrentPage] = useState(0);
 
   const totalPages = Math.ceil(quinipolos.length / itemsPerPage);
@@ -59,7 +60,7 @@ export const PaginatedQuinipolosList: React.FC<
             key={quinipolo.id}
             style={index > 0 ? styles.quinipoloItem : undefined}
           >
-            <QuinipoloCard quinipolo={quinipolo} username={username} />
+            <QuinipoloCard quinipolo={quinipolo} username={username} userLeagues={userLeagues} />
           </View>
         ))}
       </View>

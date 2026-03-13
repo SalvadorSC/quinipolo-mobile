@@ -5,6 +5,7 @@ import React, {
   ReactNode,
   useEffect,
   useCallback,
+  useRef,
 } from 'react';
 import * as storage from '../utils/storage';
 import { supabase } from '../services/supabaseClient';
@@ -32,6 +33,7 @@ export type UserDataType = {
   stripeCustomerId?: string;
   isPro?: boolean;
   productId?: string;
+  hasScraperAccess?: boolean;
   isAuthenticated: boolean;
   authInitialized?: boolean;
 };
@@ -62,6 +64,7 @@ const STORAGE_KEYS = {
 
 // Export the provider as a named export
 export const UserProvider = ({ children }: UserProviderProps) => {
+  const signOutInProgress = useRef(false);
   const [userData, setUserData] = useState<UserDataType>({
     role: '',
     leagues: [],
@@ -97,17 +100,21 @@ export const UserProvider = ({ children }: UserProviderProps) => {
             const userProfile = await getUserProfile();
             if (!isMounted) return;
             
-            setUserData((prev) => ({
-              ...prev,
-              userId: session.user.id,
-              username: userProfile.username || session.user.email || '',
-              emailAddress: userProfile.emailAddress || session.user.email || '',
-              role: userProfile.role || '',
-              leagues: userProfile.leagues || [],
-              userLeagues: userProfile.userLeagues || [],
-              isAuthenticated: true,
-              authInitialized: true,
-            }));
+            if (!signOutInProgress.current) {
+              setUserData((prev) => ({
+                ...prev,
+                userId: session.user.id,
+                username: userProfile.username || session.user.email || '',
+                emailAddress: userProfile.emailAddress || session.user.email || '',
+                role: userProfile.role || '',
+                leagues: userProfile.leagues || [],
+                userLeagues: userProfile.userLeagues || [],
+                hasScraperAccess: userProfile.hasScraperAccess ?? false,
+                isPro: userProfile.isPro ?? false,
+                isAuthenticated: true,
+                authInitialized: true,
+              }));
+            }
           } catch (profileError: any) {
             // If profile fetch fails, use session data
             console.error('[UserContext] Error fetching user profile on init:', profileError);
@@ -174,17 +181,21 @@ export const UserProvider = ({ children }: UserProviderProps) => {
             // Always try to fetch profile to ensure we have latest data
             try {
               const userProfile = await getUserProfile();
-              setUserData((prev) => ({
-                ...prev,
-                userId,
-                username: userProfile.username || session.user.email || '',
-                emailAddress: userProfile.emailAddress || session.user.email || '',
-                role: userProfile.role || prev.role,
-                leagues: userProfile.leagues || prev.leagues,
-                userLeagues: userProfile.userLeagues || prev.userLeagues,
-                isAuthenticated: true,
-                authInitialized: true,
-              }));
+              if (!signOutInProgress.current) {
+                setUserData((prev) => ({
+                  ...prev,
+                  userId,
+                  username: userProfile.username || session.user.email || '',
+                  emailAddress: userProfile.emailAddress || session.user.email || '',
+                  role: userProfile.role || prev.role,
+                  leagues: userProfile.leagues || prev.leagues,
+                  userLeagues: userProfile.userLeagues || prev.userLeagues,
+                  hasScraperAccess: userProfile.hasScraperAccess ?? prev.hasScraperAccess ?? false,
+                  isPro: userProfile.isPro ?? prev.isPro ?? false,
+                  isAuthenticated: true,
+                  authInitialized: true,
+                }));
+              }
             } catch (profileError) {
               console.error('[UserContext] Error fetching profile on auth change:', profileError);
               // If profile fetch fails, at least set basic session data
@@ -275,33 +286,31 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   }, []);
 
   const signOut = useCallback(async () => {
+    signOutInProgress.current = true;
     try {
       await supabase.auth.signOut();
-      
-      // Clear secure storage
-      await Promise.all([
-        storage.deleteItemAsync(STORAGE_KEYS.USER_ID),
-        storage.deleteItemAsync(STORAGE_KEYS.USERNAME),
-        storage.deleteItemAsync(STORAGE_KEYS.EMAIL),
-        storage.deleteItemAsync(STORAGE_KEYS.IS_AUTHENTICATED),
-      ]);
-
-      // Clear user data
-      setUserData({
-        role: '',
-        leagues: [],
-        quinipolosToAnswer: [],
-        userId: '',
-        userLeagues: [],
-        emailAddress: '',
-        username: '',
-        hasBeenChecked: false,
-        isAuthenticated: false,
-        authInitialized: true,
-      });
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error('Error signing out from Supabase:', error);
     }
+    await Promise.all([
+      storage.deleteItemAsync(STORAGE_KEYS.USER_ID),
+      storage.deleteItemAsync(STORAGE_KEYS.USERNAME),
+      storage.deleteItemAsync(STORAGE_KEYS.EMAIL),
+      storage.deleteItemAsync(STORAGE_KEYS.IS_AUTHENTICATED),
+    ]);
+    setUserData({
+      role: '',
+      leagues: [],
+      quinipolosToAnswer: [],
+      userId: '',
+      userLeagues: [],
+      emailAddress: '',
+      username: '',
+      hasBeenChecked: false,
+      isAuthenticated: false,
+      authInitialized: true,
+    });
+    signOutInProgress.current = false;
   }, []);
 
   const refreshUserData = useCallback(async () => {

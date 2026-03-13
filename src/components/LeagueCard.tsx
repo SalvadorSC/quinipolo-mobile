@@ -1,8 +1,9 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { Card, Text, IconButton } from 'react-native-paper';
+import { Text, IconButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { colors } from '../styles/globalStyles';
+import { LeagueIconBadge } from './index';
 
 interface LeagueCardProps {
   league: {
@@ -21,106 +22,39 @@ const LeagueCard: React.FC<LeagueCardProps> = ({ league }) => {
   const navigation = useNavigation<any>();
 
   const handlePress = () => {
-    // Navigate to league dashboard
     navigation.navigate('LeagueDashboard', { id: league.leagueId });
   };
 
-  const getLeagueIcon = () => {
-    // For MVP, use a simple trophy icon
-    // In the future, implement custom league icons
-    return 'trophy';
-  };
-
-  const getIconColor = () => {
-    return league.icon_style?.icon_color || colors.primary;
-  };
-
-  const getAccentColor = () => {
-    return league.icon_style?.accent_color || colors.primary;
-  };
+  const accentColor = league.icon_style?.accent_color || colors.primary;
+  const iconColor = league.icon_style?.icon_color || '#ffffff';
+  const icon = league.icon_style?.icon || 'volleyball';
 
   return (
-    <TouchableOpacity onPress={handlePress} activeOpacity={0.7}>
-      <Card style={styles.card}>
-        <Card.Content style={styles.content}>
-          <View style={styles.iconContainer}>
-            <View
-              style={[
-                styles.iconCircle,
-                { backgroundColor: getAccentColor() + '20' },
-              ]}
-            >
-              <IconButton
-                icon={getLeagueIcon()}
-                size={32}
-                iconColor={getIconColor()}
-                style={styles.icon}
-              />
-            </View>
-          </View>
-
-          <View style={styles.infoContainer}>
-            <Text style={styles.leagueName} numberOfLines={1}>
-              {league.leagueName}
-            </Text>
-            <Text style={styles.participants}>
-              {league.participants.length}{' '}
-              {league.participants.length === 1 ? 'participant' : 'participants'}
-            </Text>
-          </View>
-
-          <IconButton
-            icon="chevron-right"
-            size={24}
-            iconColor={colors.textSecondary}
-            style={styles.chevron}
-          />
-        </Card.Content>
-      </Card>
+    <TouchableOpacity onPress={handlePress} activeOpacity={0.75} style={[styles.pill, { backgroundColor: accentColor }]}>
+      <LeagueIconBadge icon={icon} sizePx={40} marginLeftPx={0} accentColor={accentColor} iconColor={iconColor} />
+      <Text style={styles.leagueName} numberOfLines={1}>
+        {league.leagueName.toUpperCase()}
+      </Text>
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
-  card: {
-    marginVertical: 6,
-    marginHorizontal: 4,
-    borderRadius: 12,
-    elevation: 2,
-  },
-  content: {
+  pill: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
-  },
-  iconContainer: {
-    marginRight: 16,
-  },
-  iconCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  icon: {
-    margin: 0,
-  },
-  infoContainer: {
-    flex: 1,
+    borderRadius: 10,
+    paddingRight: 16,
+    paddingVertical: 4,
+    minHeight: 52,
+    gap: 12,
   },
   leagueName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: 4,
-  },
-  participants: {
-    fontSize: 14,
-    color: colors.textSecondary,
-  },
-  chevron: {
-    margin: 0,
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#ffffff',
+    letterSpacing: 0.5,
   },
 });
 

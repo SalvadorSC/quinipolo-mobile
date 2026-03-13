@@ -39,3 +39,20 @@ export interface AnswerResponse {
   message: string;
   points?: number;
 }
+
+export interface MatchStatistics {
+  homeTeam: { count: number; percentage: number };
+  awayTeam: { count: number; percentage: number };
+  empat: { count: number; percentage: number };
+}
+
+export interface AnswerStatistics {
+  total_responses: number;
+  computed_at: string;
+  matches: Array<{
+    matchNumber: number;
+    homeTeam: string;
+    awayTeam: string;
+    statistics: MatchStatistics;
+  }>;
+}

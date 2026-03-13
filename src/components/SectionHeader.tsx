@@ -6,12 +6,14 @@ import { colors } from '../styles/globalStyles';
 interface SectionHeaderProps {
   title: string;
   accentColor?: string;
+  titleColor?: string;
   style?: object;
 }
 
 const SectionHeader: React.FC<SectionHeaderProps> = ({
   title,
   accentColor = colors.primary,
+  titleColor,
   style,
 }) => {
   return (
@@ -19,7 +21,9 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
       <View
         style={[styles.sectionTitleDecorator, { backgroundColor: accentColor }]}
       />
-      <Text style={styles.sectionTitle}>{title}</Text>
+      <Text style={[styles.sectionTitle, titleColor ? { color: titleColor } : undefined]}>
+        {title}
+      </Text>
     </View>
   );
 };

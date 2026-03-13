@@ -13,6 +13,10 @@ export interface SurveyData {
   isGame15: boolean;
   leagueId?: string;
   leagueName?: string;
+  /** Match 15 only: goal range for home team (e.g. "-", "11/12", "+") */
+  goalsHomeTeam?: string;
+  /** Match 15 only: goal range for away team */
+  goalsAwayTeam?: string;
 }
 
 export interface TeamOption {
@@ -29,7 +33,14 @@ export interface CorrectAnswer {
   chosenWinner: string;
   goalsHomeTeam: string;
   goalsAwayTeam: string;
+  /** Match 15 only: exact numeric score for graphics (separate from range for pleno) */
+  goalsHomeTeamExact?: string;
+  goalsAwayTeamExact?: string;
+  /** When match ended in tie: regular time score for graphics (e.g. 14-14 before penalty shootout) */
+  regularGoalsHomeTeam?: string;
+  regularGoalsAwayTeam?: string;
   isGame15: boolean;
+  cancelled?: boolean; // If true, this match is cancelled and counts as correct for everyone
 }
 
 // Supabase Quinipolo structure (what comes from the database)
@@ -88,6 +99,8 @@ export interface QuinipoloType {
   correct_answers?: CorrectAnswer[];
   answered?: boolean;
   answer_statistics?: AnswerStatistics;
+  /** Matchday (e.g. J14) from correction-see; used for graphics */
+  matchday?: string;
 }
 
 // API Response types

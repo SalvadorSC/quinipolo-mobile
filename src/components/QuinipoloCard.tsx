@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { Card, Text, Chip, IconButton } from 'react-native-paper';
+import { Text, IconButton } from 'react-native-paper';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { colors } from '../styles/globalStyles';
@@ -17,13 +18,11 @@ interface QuinipoloCardProps {
     is_deleted?: boolean;
   };
   username: string;
+  userLeagues?: Array<{ league_id: string; role: string }>;
 }
 
-const QuinipoloCard: React.FC<QuinipoloCardProps> = ({
-  quinipolo,
-  username,
-}) => {
-  const navigation = useNavigation();
+const QuinipoloCard: React.FC<QuinipoloCardProps> = ({ quinipolo, username, userLeagues }) => {
+  const navigation = useNavigation<any>();
   const { t } = useTranslation();
 
   const deadline = new Date(quinipolo.end_date);
@@ -32,6 +31,8 @@ const QuinipoloCard: React.FC<QuinipoloCardProps> = ({
   const hasAnswered =
     quinipolo.answered ||
     quinipolo.participants_who_answered?.includes(username);
+  const isAdmin =
+    userLeagues?.find(ul => ul.league_id === quinipolo.league_id)?.role === 'moderator';
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -44,269 +45,153 @@ const QuinipoloCard: React.FC<QuinipoloCardProps> = ({
     });
   };
 
-  const getTimeRemaining = () => {
-    const diff = deadline.getTime() - now.getTime();
-    if (diff <= 0) return null;
-
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-
-    if (days > 0) return `${days}d ${hours}h`;
-    if (hours > 0) return `${hours}h ${minutes}m`;
-    return `${minutes}m`;
-  };
-
-  const getStatusColor = () => {
-    if (quinipolo.is_deleted) return colors.error;
-    if (deadlineIsInPast) return colors.textSecondary;
-    if (hasAnswered) return colors.success;
-    return colors.warning;
-  };
-
   const getStatusText = () => {
     if (quinipolo.is_deleted) return t('deleted') || 'Deleted';
-    if (deadlineIsInPast && quinipolo.has_been_corrected)
-      return t('corrected') || 'Corrected';
-    if (deadlineIsInPast) return t('expired') || 'Expired';
+    if (deadlineIsInPast && quinipolo.has_been_corrected) return t('corrected') || 'Corrected';
+    if (deadlineIsInPast && hasAnswered) return t('answered') || 'Answered';
+    if (deadlineIsInPast) return t('notAnswered') || 'Not answered';
     if (hasAnswered) return t('answered') || 'Answered';
-    return t('notAnswered') || 'Pending';
+    return t('pending') || 'Pending';
   };
 
-  const handlePress = () => {
-    if (quinipolo.is_deleted) return;
-
-    if (!deadlineIsInPast && !hasAnswered) {
-      // Navigate to answer screen
-      (navigation as any).navigate('AnswerQuinipolo', { quinipoloId: quinipolo.id });
-    } else if (deadlineIsInPast) {
-      // Navigate to view past quinipolo (with or without answers)
-      (navigation as any).navigate('ViewQuinipolo', { quinipoloId: quinipolo.id });
-    }
+  const handleAnswer = () => {
+    navigation.navigate('AnswerQuinipolo', { quinipoloId: quinipolo.id });
   };
 
-  const timeRemaining = getTimeRemaining();
+  const handleView = () => {
+    navigation.navigate('ViewQuinipolo', { quinipoloId: quinipolo.id });
+  };
+
+  const handleCorrect = () => {
+    const mode = quinipolo.has_been_corrected ? 'editCorrection' : 'correct';
+    navigation.navigate('AnswerQuinipolo', { quinipoloId: quinipolo.id, mode });
+  };
+
+  if (quinipolo.is_deleted) return null;
 
   return (
-    <TouchableOpacity
-      onPress={handlePress}
-      disabled={quinipolo.is_deleted}
-      activeOpacity={0.7}
-    >
-      <Card style={styles.card}>
-        <Card.Content>
-          <View style={styles.header}>
-            <View style={styles.headerLeft}>
-              <Text style={styles.leagueName}>{quinipolo.league_name}</Text>
-              <Text style={styles.deadline}>{formatDate(quinipolo.end_date)}</Text>
-            </View>
-            <View style={styles.headerRight}>
-              <Chip
-                mode="flat"
-                style={[styles.statusChip, { backgroundColor: getStatusColor() + '20' }]}
-                textStyle={[styles.statusText, { color: getStatusColor() }]}
-              >
-                {getStatusText()}
-              </Chip>
-            </View>
-          </View>
+    <View style={styles.card}>
+      {/* Header row */}
+      <View style={styles.header}>
+        <View style={styles.headerLeft}>
+          <Text style={styles.leagueName}>{quinipolo.league_name}</Text>
+          <Text style={styles.deadline}>{formatDate(quinipolo.end_date)}</Text>
+        </View>
+        <Text style={styles.statusText}>{getStatusText()}</Text>
+        <IconButton icon="dots-vertical" size={18} iconColor={colors.textSecondary} style={styles.menuBtn} onPress={() => {}} />
+      </View>
 
-          {timeRemaining && !hasAnswered && (
-            <View style={styles.countdownContainer}>
-              <IconButton
-                icon="clock-outline"
-                size={16}
-                iconColor={colors.warning}
-                style={styles.clockIcon}
-              />
-              <Text style={styles.countdown}>{timeRemaining} {t('remaining') || 'remaining'}</Text>
-            </View>
-          )}
+      {/* Action buttons */}
+      <View style={styles.buttons}>
+        {isAdmin && deadlineIsInPast && (
+          <TouchableOpacity onPress={handleCorrect} activeOpacity={0.8} style={styles.btnWrapper}>
+            <LinearGradient colors={['#2e7d32', '#66bb6a']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.correctBtn}>
+              <Text style={styles.correctBtnText}>{(t('correct') || 'CORRECT').toUpperCase()}</Text>
+              <IconButton icon="pencil" size={16} iconColor="#fff" style={styles.btnIcon} />
+            </LinearGradient>
+          </TouchableOpacity>
+        )}
 
-          {hasAnswered && quinipolo.has_been_corrected && (
-            <View style={styles.correctedContainer}>
-              <IconButton
-                icon="check-circle"
-                size={16}
-                iconColor={colors.success}
-                style={styles.correctedIcon}
-              />
-              <Text style={styles.correctedText}>
-                {t('correctedTapToView') || 'Corrected - Tap to view results'}
+        {deadlineIsInPast ? (
+          <TouchableOpacity onPress={handleView} activeOpacity={0.8} style={styles.btnWrapper}>
+            <LinearGradient colors={['#1976d2', '#42a5f5']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.viewBtn}>
+              <Text style={styles.viewBtnText}>
+                {(hasAnswered ? (t('viewAnswers') || 'VIEW ANSWERS') : (t('viewQuinipolo') || 'VIEW QUINIPOLO')).toUpperCase()}
               </Text>
-            </View>
-          )}
-
-          {hasAnswered && !quinipolo.has_been_corrected && deadlineIsInPast && (
-            <View style={styles.pendingCorrectionContainer}>
-              <IconButton
-                icon="clock-check"
-                size={16}
-                iconColor={colors.primary}
-                style={styles.pendingIcon}
-              />
-              <Text style={styles.pendingCorrectionText}>
-                {t('pendingCorrection') || 'Answered - Pending correction'}
-              </Text>
-            </View>
-          )}
-
-          {!hasAnswered && deadlineIsInPast && (
-            <View style={styles.notAnsweredContainer}>
-              <IconButton
-                icon="information"
-                size={16}
-                iconColor={colors.textSecondary}
-                style={styles.notAnsweredIcon}
-              />
-              <Text style={styles.notAnsweredText}>
-                {t('notAnsweredTapToView') || 'Not answered - Tap to view'}
-              </Text>
-            </View>
-          )}
-
-          {!quinipolo.is_deleted && (
-            <View style={styles.actions}>
-              {!deadlineIsInPast && !hasAnswered ? (
-                <IconButton
-                  icon="play-circle"
-                  size={24}
-                  iconColor={colors.primary}
-                  onPress={handlePress}
-                />
-              ) : deadlineIsInPast ? (
-                <IconButton
-                  icon="eye"
-                  size={24}
-                  iconColor={colors.primary}
-                  onPress={handlePress}
-                />
-              ) : null}
-            </View>
-          )}
-        </Card.Content>
-      </Card>
-    </TouchableOpacity>
+              <IconButton icon="eye" size={16} iconColor="#fff" style={styles.btnIcon} />
+            </LinearGradient>
+          </TouchableOpacity>
+        ) : !hasAnswered ? (
+          <TouchableOpacity onPress={handleAnswer} activeOpacity={0.8} style={styles.btnWrapper}>
+            <LinearGradient colors={['#1976d2', '#42a5f5']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.viewBtn}>
+              <Text style={styles.viewBtnText}>{(t('answer') || 'ANSWER').toUpperCase()}</Text>
+              <IconButton icon="pencil-outline" size={16} iconColor="#fff" style={styles.btnIcon} />
+            </LinearGradient>
+          </TouchableOpacity>
+        ) : null}
+      </View>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   card: {
-    marginVertical: 8,
-    marginHorizontal: 4,
-    borderRadius: 12,
-    elevation: 2,
+    backgroundColor: '#dbeafe',
+    borderRadius: 10,
+    marginBottom: 12,
+    overflow: 'hidden',
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 8,
+    alignItems: 'center',
+    paddingTop: 12,
+    paddingLeft: 14,
+    paddingRight: 4,
+    paddingBottom: 8,
   },
   headerLeft: {
     flex: 1,
   },
-  headerRight: {
-    marginLeft: 12,
-  },
   leagueName: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     color: colors.text,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   deadline: {
-    fontSize: 14,
+    fontSize: 13,
     color: colors.textSecondary,
-  },
-  statusChip: {
-    height: 28,
   },
   statusText: {
     fontSize: 12,
-    fontWeight: '600',
-  },
-  countdownContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    backgroundColor: colors.warning + '10',
-    borderRadius: 8,
-    alignSelf: 'flex-start',
-  },
-  clockIcon: {
-    margin: 0,
-    marginRight: -4,
-  },
-  countdown: {
-    fontSize: 14,
-    color: colors.warning,
-    fontWeight: '600',
-  },
-  correctedContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    backgroundColor: colors.success + '10',
-    borderRadius: 8,
-    alignSelf: 'flex-start',
-  },
-  correctedIcon: {
-    margin: 0,
-    marginRight: -4,
-  },
-  correctedText: {
-    fontSize: 13,
-    color: colors.success,
-    fontWeight: '600',
-  },
-  pendingCorrectionContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    backgroundColor: colors.primary + '10',
-    borderRadius: 8,
-    alignSelf: 'flex-start',
-  },
-  pendingIcon: {
-    margin: 0,
-    marginRight: -4,
-  },
-  pendingCorrectionText: {
-    fontSize: 13,
-    color: colors.primary,
-    fontWeight: '600',
-  },
-  notAnsweredContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    backgroundColor: colors.textSecondary + '10',
-    borderRadius: 8,
-    alignSelf: 'flex-start',
-  },
-  notAnsweredIcon: {
-    margin: 0,
-    marginRight: -4,
-  },
-  notAnsweredText: {
-    fontSize: 13,
     color: colors.textSecondary,
-    fontWeight: '600',
+    fontStyle: 'italic',
+    marginRight: 4,
   },
-  actions: {
+  menuBtn: {
+    margin: 0,
+  },
+  buttons: {
+    paddingHorizontal: 10,
+    paddingBottom: 12,
+    gap: 8,
+  },
+  btnWrapper: {
+    borderRadius: 6,
+    overflow: 'hidden',
+  },
+  correctBtn: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginTop: 8,
-    marginRight: -12,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderRadius: 6,
+    paddingLeft: 16,
+    paddingRight: 4,
+    paddingVertical: 4,
+  },
+  correctBtnText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 13,
+    letterSpacing: 0.5,
+  },
+  viewBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderRadius: 6,
+    paddingLeft: 16,
+    paddingRight: 4,
+    paddingVertical: 4,
+  },
+  viewBtnText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 13,
+    letterSpacing: 0.5,
+  },
+  btnIcon: {
+    margin: 0,
   },
 });
 

@@ -11,7 +11,7 @@ import {
 } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
-import { useRoute, RouteProp } from '@react-navigation/native';
+import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import {
   Background,
   Leaderboard,
@@ -46,6 +46,7 @@ type LeaderboardTabValue = 'points' | 'statistics';
 const LeagueDashboardScreen = () => {
   const { t } = useTranslation();
   const route = useRoute<LeagueDashboardRouteProp>();
+  const navigation = useNavigation<any>();
   const { userData } = useUser();
   const leagueId = route.params?.id;
 
@@ -528,9 +529,10 @@ const LeagueDashboardScreen = () => {
                         mode="contained"
                         icon="plus-circle"
                         onPress={() => {
-                          // TODO: Navigate to create quinipolo screen when route is available
-                          console.log('Create quinipolo for league:', leagueId);
-                          // navigation.navigate('CreateQuinipolo' as never, { leagueId } as never);
+                          navigation.navigate('CreateQuinipolo', {
+                            leagueId,
+                            leagueName: leagueDetails?.league_name,
+                          });
                         }}
                         style={[
                           styles.createButton,
@@ -547,6 +549,43 @@ const LeagueDashboardScreen = () => {
                       </Text>
                     </Card.Content>
                   </Card>
+
+                  {/* Correct Results Button */}
+                  {(() => {
+                    const now = new Date();
+                    const uncorrected = quinipolos.find(
+                      q =>
+                        !q.is_deleted &&
+                        !q.has_been_corrected &&
+                        new Date(q.end_date).getTime() <= now.getTime()
+                    );
+                    if (!uncorrected) return null;
+                    return (
+                      <Card style={styles.actionsCard}>
+                        <Card.Content>
+                          <Button
+                            mode="outlined"
+                            icon="pencil-check"
+                            onPress={() => {
+                              navigation.navigate('AnswerQuinipolo', {
+                                quinipoloId: uncorrected.id,
+                                mode: 'correct',
+                              });
+                            }}
+                            style={styles.createButton}
+                            contentStyle={styles.createButtonContent}
+                            labelStyle={styles.createButtonLabel}
+                          >
+                            {t('correctResults') || 'Correct Results'}
+                          </Button>
+                          <Text style={styles.createButtonHint}>
+                            {t('correctResultsHint') ||
+                              'Enter the correct results for the latest expired quinipolo'}
+                          </Text>
+                        </Card.Content>
+                      </Card>
+                    );
+                  })()}
                 </View>
               )}
             </>

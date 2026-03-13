@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text, Card, IconButton, ActivityIndicator, Button as PaperButton } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
-import { Background, ViewMatchRow } from '../components';
-import { usePastQuinipoloData } from '../hooks/answers';
+import { Background, ViewMatchRow, AnswerStatisticsBar } from '../components';
+import { usePastQuinipoloData, useAnswerStatistics } from '../hooks/answers';
 import { globalStyles, colors } from '../styles/globalStyles';
+import { useUser } from '../context/UserContext';
 
 type RootStackParamList = {
   ViewQuinipolo: { quinipoloId: string };
@@ -25,6 +26,15 @@ const ViewQuinipoloScreen = () => {
     quinipoloId,
     autoFetch: true,
   });
+
+  const { userData } = useUser();
+  const isAdmin = userData.role === 'systemAdmin';
+  const [showStatistics, setShowStatistics] = useState(false);
+  const { statistics } = useAnswerStatistics(
+    quinipoloId ?? null,
+    quinipolo?.end_date,
+    isAdmin && showStatistics
+  );
 
   if (loading && !quinipolo) {
     return (
@@ -105,6 +115,21 @@ const ViewQuinipoloScreen = () => {
                     </View>
                   </View>
                 </View>
+                {isAdmin && new Date(quinipolo.end_date) < new Date() && (
+                  <View style={styles.statsToggleRow}>
+                    <PaperButton
+                      mode={showStatistics ? 'contained' : 'outlined'}
+                      onPress={() => setShowStatistics(s => !s)}
+                      icon="chart-bar"
+                      compact
+                      style={styles.statsToggleButton}
+                    >
+                      {showStatistics
+                        ? (t('hideStatistics') || 'Hide Statistics')
+                        : (t('showStatistics') || 'Show Statistics')}
+                    </PaperButton>
+                  </View>
+                )}
               </Card.Content>
             </LinearGradient>
           </Card>
@@ -190,13 +215,25 @@ const ViewQuinipoloScreen = () => {
           {/* Match Results */}
           <View style={styles.matchesContainer}>
             {quinipolo.quinipolo.map((match, index) => (
-              <ViewMatchRow
-                key={`${match.homeTeam}-${match.awayTeam}-${index}`}
-                match={match}
-                matchIndex={index}
-                userAnswer={userAnswers[index]}
-                correctAnswer={quinipolo.correct_answers?.[index]}
-              />
+              <View key={`${match.homeTeam}-${match.awayTeam}-${index}`}>
+                <ViewMatchRow
+                  match={match}
+                  matchIndex={index}
+                  {...(userAnswers[index] !== undefined && { userAnswer: userAnswers[index] })}
+                  {...(quinipolo.correct_answers?.[index] !== undefined && { correctAnswer: quinipolo.correct_answers[index] })}
+                />
+                {showStatistics && statistics && (() => {
+                  const matchStats = statistics.matches.find(m => m.matchNumber === index + 1);
+                  return matchStats ? (
+                    <AnswerStatisticsBar
+                      homeTeam={match.homeTeam}
+                      awayTeam={match.awayTeam}
+                      statistics={matchStats.statistics}
+                      totalResponses={statistics.total_responses}
+                    />
+                  ) : null;
+                })()}
+              </View>
             ))}
           </View>
 
@@ -415,6 +452,13 @@ const styles = StyleSheet.create({
   backButton: {
     marginTop: 16,
     marginBottom: 24,
+  },
+  statsToggleRow: {
+    marginTop: 12,
+    alignItems: 'flex-start',
+  },
+  statsToggleButton: {
+    borderRadius: 8,
   },
 });
 

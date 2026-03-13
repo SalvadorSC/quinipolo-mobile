@@ -4,6 +4,7 @@ import { Card, Text, IconButton, Chip } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import MatchWinnerButtons from './MatchWinnerButtons';
 import GoalSelector from './GoalSelector';
+import GoalsInputs from './GoalsInputs';
 import { colors } from '../styles/globalStyles';
 import type { AnswerType, Match } from '../hooks/answers';
 
@@ -17,6 +18,12 @@ interface MatchRowProps {
   disabled?: boolean;
   isMissing?: boolean;
   showCancelButton?: boolean;
+  isCorrectionMode?: boolean;
+  onGoalsChange?: (
+    matchIndex: number,
+    teamType: 'home' | 'away' | 'regularHome' | 'regularAway',
+    value: string
+  ) => void;
 }
 
 const MatchRow: React.FC<MatchRowProps> = ({
@@ -29,6 +36,8 @@ const MatchRow: React.FC<MatchRowProps> = ({
   disabled = false,
   isMissing = false,
   showCancelButton = true,
+  isCorrectionMode = false,
+  onGoalsChange,
 }) => {
   const { t } = useTranslation();
   const isGame15 = matchIndex === 14;
@@ -88,8 +97,8 @@ const MatchRow: React.FC<MatchRowProps> = ({
               disabled={disabled}
             />
 
-            {/* Goal Selection for Match 15 */}
-            {isGame15 && answer.chosenWinner && (
+            {/* Goal Selection for Match 15 (answer mode) */}
+            {isGame15 && answer.chosenWinner && !isCorrectionMode && (
               <View style={styles.goalSelectors}>
                 <GoalSelector
                   team="home"
@@ -106,6 +115,22 @@ const MatchRow: React.FC<MatchRowProps> = ({
                   disabled={disabled}
                 />
               </View>
+            )}
+
+            {/* Goals Inputs for correction mode */}
+            {isCorrectionMode && onGoalsChange && answer.chosenWinner && (
+              <GoalsInputs
+                matchIndex={matchIndex}
+                chosenWinner={answer.chosenWinner}
+                goalsHomeTeam={answer.goalsHomeTeam}
+                goalsAwayTeam={answer.goalsAwayTeam}
+                regularGoalsHomeTeam={(answer as any).regularGoalsHomeTeam ?? ''}
+                regularGoalsAwayTeam={(answer as any).regularGoalsAwayTeam ?? ''}
+                homeTeam={match.homeTeam}
+                awayTeam={match.awayTeam}
+                onGoalsChange={onGoalsChange}
+                disabled={disabled}
+              />
             )}
           </View>
         )}

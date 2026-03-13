@@ -14,7 +14,6 @@ import {
   IconButton,
   Button,
 } from 'react-native-paper';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import {
@@ -224,198 +223,161 @@ const LeaguesScreen = () => {
         }
       >
         <View style={styles.container}>
-          {/* Header Card with Gradient */}
-          <Card style={styles.headerCard}>
-            <LinearGradient
-              colors={[colors.primary + '15', colors.primary + '05', '#FFFFFF']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.headerGradient}
-            >
-              <Card.Content>
-                <View style={styles.header}>
-                  <View style={styles.headerLeft}>
-                    <View style={styles.iconContainer}>
-                      <IconButton
-                        icon="trophy"
-                        size={32}
-                        iconColor={colors.primary}
-                        style={styles.iconButton}
-                      />
-                    </View>
-                    <View style={styles.headerText}>
-                      <Text style={styles.titleText}>
-                        {t('leagues') || 'Leagues'}
-                      </Text>
-                      <Text style={styles.subtitleText}>
-                        {t('exploreAndJoinLeagues') ||
-                          'Explore and join leagues'}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-              </Card.Content>
-            </LinearGradient>
-          </Card>
-
           {/* Leagues Section */}
           <View style={styles.section}>
             <SectionHeader
               title={t('allLeagues') || 'All Leagues'}
               accentColor={colors.primary}
+              titleColor="#fff"
             />
 
-            {/* Search Bar */}
-            <Searchbar
-              placeholder={t('searchLeagues') || 'Search leagues...'}
-              onChangeText={setSearchQuery}
-              value={searchQuery}
-              style={[
-                styles.searchBar,
-                {
-                  borderTopLeftRadius: 12,
-                  borderTopRightRadius: 12,
-                  borderBottomLeftRadius: 0,
-                  borderBottomRightRadius: 0,
-                },
-              ]}
-              inputStyle={styles.searchInput}
-              iconColor={colors.primary}
-              theme={{
-                colors: {
-                  primary: colors.primary,
-                },
-                roundness: 0,
-              }}
-            />
+            <Card style={styles.sectionCard}>
+              <Card.Content>
+                {/* Search Bar */}
+                <Searchbar
+                  placeholder={t('searchLeagues') || 'Search leagues...'}
+                  onChangeText={setSearchQuery}
+                  value={searchQuery}
+                  style={styles.searchBar}
+                  inputStyle={styles.searchInput}
+                  iconColor={colors.primary}
+                  theme={{
+                    colors: {
+                      primary: colors.primary,
+                    },
+                    roundness: 8,
+                  }}
+                />
 
-            {/* Leagues Table */}
-            {loading && leagues.length === 0 ? (
-              <LoadingCard
-                message={t('loadingLeagues') || 'Loading leagues...'}
-                accentColor={colors.primary}
-              />
-            ) : displayLeagues.length > 0 ? (
-              <View style={styles.tableContainer}>
-                <ScrollView
-                  showsVerticalScrollIndicator={true}
-                  nestedScrollEnabled={true}
-                >
-                  <DataTable style={styles.table}>
-                    <DataTable.Header style={tableStyles.header}>
-                      <DataTable.Title style={styles.nameColumn}>
-                        <Text style={tableStyles.headerText}>
-                          {t('name') || 'Name'}
-                        </Text>
-                      </DataTable.Title>
-                      <DataTable.Title style={styles.peopleColumn}>
-                        <IconButton
-                          icon="account-group"
-                          size={16}
-                          iconColor={colors.text}
-                          style={styles.headerIcon}
-                        />
-                      </DataTable.Title>
-                      <DataTable.Title style={styles.visibilityColumn}>
-                        <IconButton
-                          icon="lock"
-                          size={16}
-                          iconColor={colors.text}
-                          style={styles.headerIcon}
-                        />
-                      </DataTable.Title>
-                      <DataTable.Title style={styles.actionColumn}>
-                        <IconButton
-                          icon="dots-horizontal"
-                          size={16}
-                          iconColor={colors.text}
-                          style={styles.headerIcon}
-                        />
-                      </DataTable.Title>
-                    </DataTable.Header>
+                {/* Leagues Table */}
+                {loading && leagues.length === 0 ? (
+                  <LoadingCard
+                    message={t('loadingLeagues') || 'Loading leagues...'}
+                    accentColor={colors.primary}
+                  />
+                ) : displayLeagues.length > 0 ? (
+                  <View style={styles.tableContainer}>
+                    <ScrollView
+                      showsVerticalScrollIndicator={true}
+                      nestedScrollEnabled={true}
+                    >
+                      <DataTable style={styles.table}>
+                        <DataTable.Header style={tableStyles.header}>
+                          <DataTable.Title style={styles.nameColumn}>
+                            <Text style={tableStyles.headerText}>
+                              {t('name') || 'Name'}
+                            </Text>
+                          </DataTable.Title>
+                          <DataTable.Title style={styles.peopleColumn}>
+                            <IconButton
+                              icon="account-group"
+                              size={16}
+                              iconColor={colors.text}
+                              style={styles.headerIcon}
+                            />
+                          </DataTable.Title>
+                          <DataTable.Title style={styles.visibilityColumn}>
+                            <IconButton
+                              icon="lock"
+                              size={16}
+                              iconColor={colors.text}
+                              style={styles.headerIcon}
+                            />
+                          </DataTable.Title>
+                          <DataTable.Title style={styles.actionColumn}>
+                            <IconButton
+                              icon="dots-horizontal"
+                              size={16}
+                              iconColor={colors.text}
+                              style={styles.headerIcon}
+                            />
+                          </DataTable.Title>
+                        </DataTable.Header>
 
-                    {displayLeagues.map(league => (
-                      <DataTable.Row
-                        key={league.id}
-                        style={[
-                          tableStyles.row,
-                          isUserInLeague(league) && styles.userLeagueRow,
-                        ]}
-                      >
-                        <DataTable.Cell style={styles.nameColumn}>
-                          <Text
+                        {displayLeagues.map(league => (
+                          <DataTable.Row
+                            key={league.id}
                             style={[
-                              tableStyles.cellText,
-                              styles.leagueName,
-                              isUserInLeague(league) &&
-                                tableStyles.currentUserText,
-                            ]}
-                            numberOfLines={2}
-                          >
-                            {league.league_name}
-                          </Text>
-                        </DataTable.Cell>
-                        <DataTable.Cell style={styles.peopleColumn}>
-                          <Text style={tableStyles.cellText}>
-                            {league.participants?.length || 0}
-                          </Text>
-                        </DataTable.Cell>
-                        <DataTable.Cell style={styles.visibilityColumn}>
-                          <Text
-                            style={[
-                              tableStyles.cellText,
-                              styles.visibilityText,
+                              tableStyles.row,
+                              isUserInLeague(league) && styles.userLeagueRow,
                             ]}
                           >
-                            {league.is_private
-                              ? t('private') || 'Private'
-                              : t('public') || 'Public'}
-                          </Text>
-                        </DataTable.Cell>
-                        <DataTable.Cell style={styles.actionColumn}>
-                          <Button
-                            mode="contained"
-                            onPress={() => handleLeagueAction(league)}
-                            disabled={hasPendingPetition(league)}
-                            loading={processingLeagueId === league.id}
-                            style={[
-                              styles.actionButton,
-                              {
-                                backgroundColor: isUserInLeague(league)
-                                  ? colors.primary
-                                  : hasPendingPetition(league)
-                                    ? colors.textSecondary
-                                    : colors.success,
-                              },
-                            ]}
-                            labelStyle={styles.actionButtonLabel}
-                            compact
-                          >
-                            {getButtonText(league)}
-                          </Button>
-                        </DataTable.Cell>
-                      </DataTable.Row>
-                    ))}
-                  </DataTable>
-                </ScrollView>
-                <View style={styles.tableBottom} />
-              </View>
-            ) : (
-              <EmptyStateCard
-                icon="trophy-outline"
-                title={
-                  searchQuery
-                    ? t('noLeaguesFound') || 'No Leagues Found'
-                    : t('noLeagues') || 'No Leagues'
-                }
-                description={
-                  searchQuery
-                    ? t('tryDifferentSearch') || 'Try a different search term'
-                    : t('noLeaguesYet') || 'No leagues available yet'
-                }
-                accentColor={colors.primary}
-              />
-            )}
+                            <DataTable.Cell style={styles.nameColumn}>
+                              <Text
+                                style={[
+                                  tableStyles.cellText,
+                                  styles.leagueName,
+                                  isUserInLeague(league) &&
+                                    tableStyles.currentUserText,
+                                ]}
+                                numberOfLines={2}
+                              >
+                                {league.league_name}
+                              </Text>
+                            </DataTable.Cell>
+                            <DataTable.Cell style={styles.peopleColumn}>
+                              <Text style={tableStyles.cellText}>
+                                {league.participants?.length || 0}
+                              </Text>
+                            </DataTable.Cell>
+                            <DataTable.Cell style={styles.visibilityColumn}>
+                              <Text
+                                style={[
+                                  tableStyles.cellText,
+                                  styles.visibilityText,
+                                ]}
+                              >
+                                {league.is_private
+                                  ? t('private') || 'Private'
+                                  : t('public') || 'Public'}
+                              </Text>
+                            </DataTable.Cell>
+                            <DataTable.Cell style={styles.actionColumn}>
+                              <Button
+                                mode="contained"
+                                onPress={() => handleLeagueAction(league)}
+                                disabled={hasPendingPetition(league)}
+                                loading={processingLeagueId === league.id}
+                                style={[
+                                  styles.actionButton,
+                                  {
+                                    backgroundColor: isUserInLeague(league)
+                                      ? colors.primary
+                                      : hasPendingPetition(league)
+                                        ? colors.textSecondary
+                                        : colors.success,
+                                  },
+                                ]}
+                                labelStyle={styles.actionButtonLabel}
+                                compact
+                              >
+                                {getButtonText(league)}
+                              </Button>
+                            </DataTable.Cell>
+                          </DataTable.Row>
+                        ))}
+                      </DataTable>
+                    </ScrollView>
+                    <View style={styles.tableBottom} />
+                  </View>
+                ) : (
+                  <EmptyStateCard
+                    icon="trophy-outline"
+                    title={
+                      searchQuery
+                        ? t('noLeaguesFound') || 'No Leagues Found'
+                        : t('noLeagues') || 'No Leagues'
+                    }
+                    description={
+                      searchQuery
+                        ? t('tryDifferentSearch') || 'Try a different search term'
+                        : t('noLeaguesYet') || 'No leagues available yet'
+                    }
+                    accentColor={colors.primary}
+                  />
+                )}
+              </Card.Content>
+            </Card>
           </View>
         </View>
       </ScrollView>
@@ -427,84 +389,31 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
     paddingTop: 16,
+    paddingBottom: 40,
   },
   container: {
     paddingVertical: 0,
     paddingHorizontal: 16,
     width: '100%',
   },
-  headerCard: {
-    marginBottom: 24,
-    borderRadius: 20,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    overflow: 'hidden',
-  },
-  headerGradient: {
-    borderRadius: 20,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 8,
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    gap: 16,
-  },
-  iconContainer: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
-    borderRadius: 28,
-    width: 56,
-    height: 56,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-  },
-  iconButton: {
-    margin: 0,
-  },
-  headerText: {
-    flex: 1,
-    gap: 4,
-  },
-  titleText: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: colors.text,
-    letterSpacing: 0.3,
-  },
-  subtitleText: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    fontWeight: '500',
-  },
   section: {
     marginBottom: 32,
     width: '100%',
   },
-  searchBar: {
-    marginTop: 12,
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
-    elevation: 1,
-    backgroundColor: '#FFFFFF',
+  sectionCard: {
+    borderRadius: 16,
+    backgroundColor: '#fff',
+    elevation: 3,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+  },
+  searchBar: {
+    marginBottom: 12,
+    borderRadius: 8,
+    elevation: 0,
+    backgroundColor: '#f5f5f5',
   },
   searchInput: {
     fontSize: 14,
@@ -514,11 +423,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.white,
     borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
   },
   table: {
     minWidth: 270,

@@ -125,19 +125,21 @@ export const globalStyles = StyleSheet.create({
 
 // Color constants
 export const colors = {
-  primary: '#1890ff',
-  primaryLight: '#e6f7ff',
-  secondary: '#4285F4',
-  success: '#52c41a',
+  primary: '#1976d2',
+  primaryLight: '#e3f2fd',
+  primaryDark: '#0d47a1',
+  secondary: '#1565c0',
+  success: '#2e7d32',
+  successLight: '#e8f5e9',
   error: '#d32f2f',
-  warning: '#faad14',
-  info: '#1890ff',
-  text: '#000000',
-  textSecondary: '#666666',
-  background: '#f5f5f5',
+  warning: '#f9a825',
+  info: '#1976d2',
+  text: '#212121',
+  textSecondary: '#757575',
+  background: '#f0f6ff',
   white: '#ffffff',
   border: '#e0e0e0',
-  borderLight: '#d9d9d9',
+  borderLight: '#f5f5f5',
 };
 
 // Typography constants
