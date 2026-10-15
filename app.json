@@ -15,7 +15,12 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "dev.salvasc.quinipolo"
+      "bundleIdentifier": "dev.salvasc.quinipolo",
+      "buildNumber": "10",
+      "associatedDomains": [
+        "applinks:quinipolo.com",
+        "applinks:www.quinipolo.com"
+      ]
     },
     "android": {
       "adaptiveIcon": {
@@ -24,6 +29,7 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "dev.salvasc.quinipolo",
+      "versionCode": 10,
       "intentFilters": [
         {
           "action": "VIEW",
@@ -31,7 +37,11 @@
           "data": [
             {
               "scheme": "https",
-              "host": "quinipolo.app"
+              "host": "quinipolo.com"
+            },
+            {
+              "scheme": "https",
+              "host": "www.quinipolo.com"
             }
           ],
           "category": ["BROWSABLE", "DEFAULT"]
@@ -41,10 +51,7 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      "expo-secure-store",
-      "expo-web-browser"
-    ],
+    "plugins": ["expo-secure-store", "expo-web-browser"],
     "extra": {
       "eas": {
         "projectId": "abbf9416-c279-4f84-8152-7711ea3fc4fd"
