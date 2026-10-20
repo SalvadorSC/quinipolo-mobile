@@ -3,7 +3,12 @@ import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { NavigationContainer, LinkingOptions } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useUser } from '../context/UserContext';
-import { LoginScreen, SignUpScreen, ResetPasswordScreen, EmailConfirmationScreen } from '../screens';
+import {
+  LoginScreen,
+  SignUpScreen,
+  ResetPasswordScreen,
+  EmailConfirmationScreen,
+} from '../screens';
 import BottomTabNavigator from './BottomTabNavigator';
 import { colors } from '../styles/globalStyles';
 
@@ -18,7 +23,11 @@ export type RootStackParamList = {
 const Stack = createStackNavigator<RootStackParamList>();
 
 const linking: LinkingOptions<RootStackParamList> = {
-  prefixes: ['quinipolo://', 'https://quinipolo.app'],
+  prefixes: [
+    'quinipolo://',
+    'https://quinipolo.com',
+    'https://www.quinipolo.com',
+  ],
   config: {
     screens: {
       ResetPassword: 'reset-password',
@@ -75,8 +84,14 @@ const AppNavigator: React.FC = () => {
           <>
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="SignUp" component={SignUpScreen} />
-            <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
-            <Stack.Screen name="EmailConfirmation" component={EmailConfirmationScreen} />
+            <Stack.Screen
+              name="ResetPassword"
+              component={ResetPasswordScreen}
+            />
+            <Stack.Screen
+              name="EmailConfirmation"
+              component={EmailConfirmationScreen}
+            />
           </>
         )}
       </Stack.Navigator>
