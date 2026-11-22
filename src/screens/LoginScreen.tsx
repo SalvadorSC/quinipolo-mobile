@@ -73,7 +73,7 @@ const LoginScreen = () => {
   const error = loginError;
 
   return (
-    <Background>
+    <Background safeBottom>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
@@ -165,7 +165,7 @@ const LoginScreen = () => {
                   disabled={!canSendReset || !email || resetLoading}
                   loading={resetLoading}
                   style={globalStyles.linkButton}
-                  textColor={colors.textSecondary}
+                  textColor={colors.primary}
                 />
               </View>
             </View>

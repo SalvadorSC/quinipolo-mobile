@@ -2,7 +2,7 @@
   "expo": {
     "name": "Quinipolo",
     "slug": "quinipolo-mobile",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -16,7 +16,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "dev.salvasc.quinipolo",
-      "buildNumber": "10",
+      "buildNumber": "12",
       "associatedDomains": [
         "applinks:quinipolo.com",
         "applinks:www.quinipolo.com"
@@ -29,7 +29,7 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "dev.salvasc.quinipolo",
-      "versionCode": 10,
+      "versionCode": 12,
       "blockedPermissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",

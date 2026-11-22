@@ -55,7 +55,7 @@ const ResetPasswordScreen: React.FC<Props> = ({ navigation }) => {
   // Loading state - checking if link is valid
   if (isValidLink === null) {
     return (
-      <Background>
+      <Background safeBottom>
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={colors.primary} />
           <Text style={styles.loadingText}>{t('loading') || 'Loading...'}</Text>
@@ -67,7 +67,7 @@ const ResetPasswordScreen: React.FC<Props> = ({ navigation }) => {
   // Invalid link state
   if (isValidLink === false) {
     return (
-      <Background>
+      <Background safeBottom>
         <View style={[globalStyles.container, styles.container]}>
           <Card style={globalStyles.card}>
             <Card.Content style={globalStyles.cardContent}>
@@ -100,7 +100,7 @@ const ResetPasswordScreen: React.FC<Props> = ({ navigation }) => {
   // Success state
   if (success) {
     return (
-      <Background>
+      <Background safeBottom>
         <View style={[globalStyles.container, styles.container]}>
           <Card style={globalStyles.card}>
             <Card.Content style={globalStyles.cardContent}>
@@ -132,7 +132,7 @@ const ResetPasswordScreen: React.FC<Props> = ({ navigation }) => {
 
   // Form state
   return (
-    <Background>
+    <Background safeBottom>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={[globalStyles.container, styles.container]}>
           <Card style={globalStyles.card}>

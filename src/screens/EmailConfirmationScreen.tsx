@@ -17,7 +17,7 @@ const EmailConfirmationScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <Background>
+    <Background safeBottom>
       <View style={[globalStyles.container, styles.container]}>
         <Card style={globalStyles.card}>
           <Card.Content style={globalStyles.cardContent}>

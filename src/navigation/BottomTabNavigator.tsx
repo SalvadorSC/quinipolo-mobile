@@ -2,6 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import HomeStackNavigator from './HomeStackNavigator';
 import LeaguesStackNavigator from './LeaguesStackNavigator';
 import ProfileStackNavigator from './ProfileStackNavigator';
@@ -17,9 +18,12 @@ const Tab = createBottomTabNavigator<BottomTabParamList>();
 
 const BottomTabNavigator: React.FC = () => {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
+  const bottomInset = insets.bottom;
 
   return (
     <Tab.Navigator
+      safeAreaInsets={{ top: 0, right: 0, bottom: 0, left: 0 }}
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           let iconName: keyof typeof MaterialCommunityIcons.glyphMap;
@@ -52,8 +56,8 @@ const BottomTabNavigator: React.FC = () => {
           },
           shadowOpacity: 0.1,
           shadowRadius: 4,
-          height: 60,
-          paddingBottom: 8,
+          height: 60 + bottomInset,
+          paddingBottom: 8 + bottomInset,
           paddingTop: 8,
         },
         tabBarLabelStyle: {
@@ -89,4 +93,3 @@ const BottomTabNavigator: React.FC = () => {
 };
 
 export default BottomTabNavigator;
-
