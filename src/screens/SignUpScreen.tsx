@@ -106,7 +106,7 @@ const SignUpScreen = () => {
   };
 
   return (
-    <Background>
+    <Background safeBottom>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}

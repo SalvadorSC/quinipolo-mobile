@@ -25,36 +25,18 @@ import {
 import { useUser } from '../context/UserContext';
 import { colors, tableStyles } from '../styles/globalStyles';
 import apiClient from '../services/api';
+import {
+  hasPendingPetition as leagueHasPendingPetition,
+  isUserInLeague as leagueIncludesUser,
+  participantCount,
+  type LeagueListItem,
+} from '../utils/leagueMembership';
 
-type LeagueParticipant = {
-  user_id: string;
-  username: string;
-  role: string;
-};
-
-type LeaguePetition = {
-  userId: string;
-  username: string;
-  status: string;
-  date: string;
-};
-
-type League = {
-  id: string;
-  league_name: string;
-  is_private: boolean;
-  participants: LeagueParticipant[];
-  participantPetitions: LeaguePetition[];
-  icon_style?: {
-    icon?: string;
-    icon_color?: string;
-    accent_color?: string;
-  };
-};
+type League = LeagueListItem;
 
 const LeaguesScreen = () => {
   const { t } = useTranslation();
-  const { userData } = useUser();
+  const { userData, updateUser } = useUser();
   const navigation = useNavigation();
 
   const [leagues, setLeagues] = useState<League[]>([]);
@@ -63,26 +45,26 @@ const LeaguesScreen = () => {
   const [processingLeagueId, setProcessingLeagueId] = useState<string | null>(
     null
   );
-
-  // Helper function to check if user is in a league
-  const isUserInLeague = useCallback(
-    (league: League) => {
-      return league.participants.some(
-        participant => participant.username === userData.username
-      );
-    },
-    [userData.username]
+  const [joinedLeagueIds, setJoinedLeagueIds] = useState<Set<string>>(
+    () => new Set()
   );
 
-  // Helper function to check if user has a pending petition
+  const isUserInLeague = useCallback(
+    (league: League) =>
+      leagueIncludesUser(
+        league,
+        {
+          username: userData.username,
+          leagues: userData.leagues,
+          userLeagues: userData.userLeagues,
+        },
+        joinedLeagueIds
+      ),
+    [joinedLeagueIds, userData.leagues, userData.userLeagues, userData.username]
+  );
+
   const hasPendingPetition = useCallback(
-    (league: League) => {
-      return league.participantPetitions?.some(
-        petition =>
-          petition.username === userData.username &&
-          petition.status === 'pending'
-      );
-    },
+    (league: League) => leagueHasPendingPetition(league, userData.username),
     [userData.username]
   );
 
@@ -91,7 +73,7 @@ const LeaguesScreen = () => {
     try {
       setLoading(true);
       const response = await apiClient.get('/api/leagues');
-      setLeagues(response.data);
+      setLeagues(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Error fetching leagues:', error);
       Alert.alert(
@@ -128,7 +110,11 @@ const LeaguesScreen = () => {
             username: userData.username,
           }
         );
-        setLeagues(response.data);
+        if (Array.isArray(response.data)) {
+          setLeagues(response.data);
+        } else {
+          await fetchLeagues();
+        }
         Alert.alert(
           t('success') || 'Success',
           t('requestSent') || 'Request sent successfully'
@@ -140,24 +126,37 @@ const LeaguesScreen = () => {
           username: userData.username,
         });
 
-        // Update local state
+        const nextCount = participantCount(league) + 1;
+        setJoinedLeagueIds(prev => {
+          const next = new Set(prev);
+          next.add(league.id);
+          return next;
+        });
         setLeagues(prevLeagues =>
           prevLeagues.map(l =>
             l.id === league.id
               ? {
                   ...l,
-                  participants: [
-                    ...l.participants,
-                    {
-                      user_id: userData.userId,
-                      username: userData.username,
-                      role: 'user',
-                    },
-                  ],
+                  participantsCount: nextCount,
+                  current_participants: nextCount,
                 }
               : l
           )
         );
+        const alreadyListed = userData.leagues.some(
+          entry => entry === league.id
+        );
+        const alreadyMember = userData.userLeagues.some(
+          membership => membership.league_id === league.id
+        );
+        updateUser({
+          leagues: alreadyListed
+            ? userData.leagues
+            : [...userData.leagues, league.id],
+          userLeagues: alreadyMember
+            ? userData.userLeagues
+            : [...userData.userLeagues, { league_id: league.id, role: 'user' }],
+        });
 
         Alert.alert(
           t('success') || 'Success',
@@ -189,8 +188,8 @@ const LeaguesScreen = () => {
       const bIn = isUserInLeague(b) ? 1 : 0;
       if (aIn !== bIn) return bIn - aIn;
 
-      const aCount = a.participants?.length ?? 0;
-      const bCount = b.participants?.length ?? 0;
+      const aCount = participantCount(a);
+      const bCount = participantCount(b);
       return bCount - aCount;
     });
   }, [leagues, searchQuery, isUserInLeague]);
@@ -317,7 +316,7 @@ const LeaguesScreen = () => {
                             </DataTable.Cell>
                             <DataTable.Cell style={styles.peopleColumn}>
                               <Text style={tableStyles.cellText}>
-                                {league.participants?.length || 0}
+                                {participantCount(league)}
                               </Text>
                             </DataTable.Cell>
                             <DataTable.Cell style={styles.visibilityColumn}>
@@ -370,7 +369,8 @@ const LeaguesScreen = () => {
                     }
                     description={
                       searchQuery
-                        ? t('tryDifferentSearch') || 'Try a different search term'
+                        ? t('tryDifferentSearch') ||
+                          'Try a different search term'
                         : t('noLeaguesYet') || 'No leagues available yet'
                     }
                     accentColor={colors.primary}

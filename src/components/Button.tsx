@@ -1,6 +1,11 @@
 import React from 'react';
-import { StyleSheet, TouchableOpacity, ViewStyle, ActivityIndicator } from 'react-native';
-import { Text } from 'react-native-paper';
+import {
+  StyleSheet,
+  TouchableOpacity,
+  ViewStyle,
+  ActivityIndicator,
+} from 'react-native';
+import { Text, Button as PaperButton } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors } from '../styles/globalStyles';
 
@@ -22,6 +27,7 @@ const Button: React.FC<ButtonProps> = ({
   loading = false,
   disabled = false,
   mode = 'contained',
+  icon,
   style,
   textColor,
 }) => {
@@ -44,7 +50,12 @@ const Button: React.FC<ButtonProps> = ({
           {loading ? (
             <ActivityIndicator color="#fff" size="small" />
           ) : (
-            <Text style={[styles.label, textColor ? { color: textColor } : undefined]}>
+            <Text
+              style={[
+                styles.label,
+                textColor ? { color: textColor } : undefined,
+              ]}
+            >
               {title}
             </Text>
           )}
@@ -53,18 +64,22 @@ const Button: React.FC<ButtonProps> = ({
     );
   }
 
-  // Fallback for other modes — keep using react-native-paper's Button
-  const { Button: PaperButton } = require('react-native-paper');
+  // Text and outlined buttons must not inherit the contained label color.
+  // A white label on the white card made the Google button a blank box
+  // and the login links unreadable.
+  const resolvedTextColor = textColor || colors.primary;
+
   return (
     <PaperButton
       mode={mode}
+      icon={icon}
       onPress={onPress}
       loading={loading}
       disabled={isDisabled}
       style={[styles.wrapper, style]}
-      textColor={textColor}
+      textColor={resolvedTextColor}
       contentStyle={styles.content}
-      labelStyle={styles.label}
+      labelStyle={[styles.altLabel, { color: resolvedTextColor }]}
     >
       {title}
     </PaperButton>
@@ -91,6 +106,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: colors.white,
+  },
+  altLabel: {
+    fontSize: 16,
+    fontWeight: '600',
   },
   disabled: {
     opacity: 0.6,
